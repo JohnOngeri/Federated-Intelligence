@@ -1,0 +1,2 @@
+episode,steps,total_reward,correct_decisions,fraud_caught,fraud_missed,approve_count,block_count,review_count
+1,50,-98.6125,18,3,2,17,19,14

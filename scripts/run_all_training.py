@@ -100,8 +100,8 @@ def main():
 
     progress = load_progress()
     print(f"Loaded progress log with {len(progress)} entries.")
-
-    input("\nPress ENTER to begin or resume training... ")
+    print("\nStarting training automatically...")
+    time.sleep(1)  # Brief pause for readability
 
     ALL_SCRIPTS = [
         ("training/dqn_training.py",        "DQN Training"),

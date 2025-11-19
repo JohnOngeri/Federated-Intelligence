@@ -42,11 +42,11 @@ class PrivFedFraudEnv(gym.Env):
         # Action space: APPROVE, BLOCK, MANUAL_REVIEW
         self.action_space = spaces.Discrete(3)
         
-        # Observation space: 13 features (all normalized 0-1)
-        # [bank_id_onehot(5), amount, txn_type, risk_score, bank_fraud_rate, 
+        # Observation space: 12 features (all normalized 0-1)
+        # [bank_id_onehot(5), amount, txn_type, risk_score, bank_fraud_rate,
         #  privacy_budget_used, manual_budget_remaining, step_normalized]
         self.observation_space = spaces.Box(
-            low=0.0, high=1.0, shape=(13,), dtype=np.float32
+            low=0.0, high=1.0, shape=(12,), dtype=np.float32
         )
         
         # Environment parameters
@@ -137,7 +137,7 @@ class PrivFedFraudEnv(gym.Env):
         return observation, reward, terminated, truncated, info
     
     def _generate_transaction(self):
-        """Generate a new transaction for evaluation"""
+        """Generate a new transaction for evaluation with realistic uncertainty"""
         
         # Select bank (Non-IID: some banks have more transactions)
         bank_weights = np.array([0.15, 0.25, 0.20, 0.30, 0.10])
@@ -146,15 +146,29 @@ class PrivFedFraudEnv(gym.Env):
         # Determine if fraud based on bank's fraud rate
         is_fraud = self.np_random.random() < self.bank_fraud_rates[self.current_bank_id]
         
-        # Generate transaction features
+        # Generate transaction features with overlapping distributions (more realistic)
         if is_fraud:
-            # Fraudulent transactions: higher amounts, higher risk scores
-            amount = self.np_random.uniform(500, 5000)
-            risk_score = self.np_random.uniform(0.6, 1.0)
+            # Fraudulent transactions: mostly high amounts/high risk, but some overlap
+            # 70% high-risk fraud, 30% low-amount fraud (harder to detect)
+            if self.np_random.random() < 0.7:
+                amount = self.np_random.uniform(500, 5000)  # High-amount fraud
+                risk_score = self.np_random.uniform(0.6, 1.0)
+            else:
+                amount = self.np_random.uniform(10, 800)  # Low-amount fraud (harder)
+                risk_score = self.np_random.uniform(0.4, 0.8)  # Moderate risk
         else:
-            # Legitimate transactions: lower amounts, lower risk scores
-            amount = self.np_random.uniform(10, 1000)
-            risk_score = self.np_random.uniform(0.0, 0.5)
+            # Legitimate transactions: mostly low amounts/low risk, but some overlap
+            # 80% low-risk legitimate, 20% high-amount legitimate (looks suspicious)
+            if self.np_random.random() < 0.8:
+                amount = self.np_random.uniform(10, 1000)  # Normal transactions
+                risk_score = self.np_random.uniform(0.0, 0.5)
+            else:
+                amount = self.np_random.uniform(1000, 4000)  # Large legitimate (e.g., business)
+                risk_score = self.np_random.uniform(0.3, 0.7)  # Moderate risk (false positive risk)
+        
+        # Add observation noise to risk score (realistic: models aren't perfect)
+        noise = self.np_random.normal(0, 0.1)  # ±10% noise
+        risk_score = np.clip(risk_score + noise, 0.0, 1.0)
         
         txn_type = self.np_random.choice(len(self.transaction_types))
         
