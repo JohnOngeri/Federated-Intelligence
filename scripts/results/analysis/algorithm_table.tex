@@ -1,0 +1,14 @@
+\begin{table}
+\caption{Algorithm Performance Comparison}
+\label{tab:algorithm_comparison}
+\begin{tabular}{lrrrrrrrr}
+\toprule
+Algorithm & Runs & Best Reward & Worst Reward & Mean Reward & Std Reward & Best Fraud Caught & Mean Fraud Caught & Mean Fraud Missed \\
+\midrule
+A2C & 10 & 229.82 & -160.78 & 168.76 & 117.98 & 15.40 & 11.67 & 1.30 \\
+DQN & 10 & 226.22 & 202.22 & 218.20 & 9.16 & 14.30 & 13.42 & 0.00 \\
+PPO & 10 & 219.93 & 148.72 & 199.66 & 20.91 & 14.40 & 12.79 & 0.16 \\
+REINFORCE & 10 & 148.53 & -11.10 & 92.86 & 69.45 & 14.20 & 9.70 & 0.41 \\
+\bottomrule
+\end{tabular}
+\end{table}
