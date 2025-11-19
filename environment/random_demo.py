@@ -1,79 +1,193 @@
 """
-Random Actions Demo
-Demonstrates the environment with random actions (no learning)
+random_demo.py
+
+High-quality random-policy demonstration for the Federated Learning Fraud Environment.
+This script:
+ - Runs N episodes using pure random actions (no learning)
+ - Renders the environment (optional)
+ - Logs episode statistics to console AND CSV
+ - Handles clean quitting when pygame window is closed
+ - Provides a command-line interface for reproducibility
+
+This acts as the "baseline" agent for your RL assignment.
 """
 
-import sys
+import argparse
+import csv
+import os
 import time
-from custom_env import PrivFedFraudEnv
+from typing import Dict, Any, List
+
+from custom_env import PrivFedFraudEnv  # Update to your new project name if needed
 
 
-def main():
-    """Run random actions demo with visualization"""
-    
-    print("=" * 60)
-    print("PrivFed Random Actions Demo")
-    print("=" * 60)
-    print("\nThis demo shows random action selection (no learning)")
-    print("Close the pygame window to exit\n")
-    
-    # Create environment with rendering
-    env = PrivFedFraudEnv(render_mode='human', max_steps=50)
-    
-    # Run episode
-    observation, info = env.reset()
-    
-    episode_reward = 0
-    action_names = {0: "APPROVE", 1: "BLOCK", 2: "MANUAL_REVIEW"}
-    
-    print(f"{'Step':<6} {'Action':<15} {'Reward':<10} {'Total':<10}")
-    print("-" * 50)
-    
+# ------------------------------------------------------------
+# Utility: Safe extraction of metrics from info dict
+# ------------------------------------------------------------
+def safe_get(info: Dict[str, Any], key: str, default: Any = 0) -> Any:
+    return info[key] if key in info and info[key] is not None else default
+
+
+# ------------------------------------------------------------
+# Run a single episode with random actions
+# ------------------------------------------------------------
+def run_random_episode(
+    env: PrivFedFraudEnv,
+    episode_index: int,
+    render: bool,
+    sleep: float
+) -> Dict[str, Any]:
+    """
+    Runs one complete episode using random actions.
+
+    Returns:
+        dict -> episode summary statistics
+    """
+    obs, info = env.reset()
     done = False
-    step = 0
-    
+
+    total_reward = 0.0
+    step_count = 0
+    action_counts = {"APPROVE": 0, "BLOCK": 0, "MANUAL_REVIEW": 0}
+
+    action_names = {0: "APPROVE", 1: "BLOCK", 2: "MANUAL_REVIEW"}
+
+    print(f"\n================= Episode {episode_index + 1} =================")
+    print(f"{'Step':<6} {'Action':<15} {'Reward':<10} {'Total':<10}")
+    print("-" * 52)
+
     while not done:
-        # Render environment
-        env.render()
-        
-        # Take random action
+
+        # Render if enabled
+        if render:
+            quit_signal = env.render()
+            if quit_signal:   # environment signals quit
+                print("\n[INFO] Window closed. Exiting episode early.")
+                done = True
+                break
+
+        # Random action
         action = env.action_space.sample()
-        
-        # Set action for display
-        if env.renderer:
-            env.renderer.set_action(action)
-        
-        # Execute action
-        observation, reward, terminated, truncated, info = env.step(action)
+        action_name = action_names.get(action, f"ACTION_{action}")
+        action_counts[action_name] += 1
+
+        # Store for rendering if available
+        if hasattr(env, "renderer") and env.renderer:
+            if hasattr(env.renderer, "set_action"):
+                env.renderer.set_action(action)
+
+        # Apply action
+        obs, reward, terminated, truncated, info = env.step(action)
         done = terminated or truncated
-        
-        episode_reward += reward
-        step += 1
-        
-        # Print step info
-        print(f"{step:<6} {action_names[action]:<15} {reward:<10.2f} {episode_reward:<10.2f}")
-        
-        # Slow down for visualization
-        time.sleep(0.5)
-    
-    print("-" * 50)
-    print(f"\nEpisode finished!")
-    print(f"Total Steps: {step}")
-    print(f"Total Reward: {episode_reward:.2f}")
-    print(f"Fraud Caught: {info['fraud_caught']}")
-    print(f"Fraud Missed: {info['fraud_missed']}")
-    print(f"Correct Decisions: {info['correct_decisions']}")
-    
-    # Keep window open
-    print("\nClose the pygame window to exit...")
-    try:
-        while True:
-            env.render()
-            time.sleep(0.1)
-    except KeyboardInterrupt:
-        pass
-    
+
+        step_count += 1
+        total_reward += reward
+
+        print(f"{step_count:<6} {action_name:<15} {reward:<10.2f} {total_reward:<10.2f}")
+
+        if sleep > 0:
+            time.sleep(sleep)
+
+    # Safe metrics retrieval
+    fraud_caught = safe_get(info, "fraud_caught")
+    fraud_missed = safe_get(info, "fraud_missed")
+    correct = safe_get(info, "correct_decisions")
+
+    print("-" * 52)
+    print("Episode Complete!")
+    print(f"Steps: {step_count}")
+    print(f"Total Reward: {total_reward:.2f}")
+    print(f"Correct Decisions: {correct}")
+    print(f"Fraud Caught: {fraud_caught}")
+    print(f"Fraud Missed: {fraud_missed}")
+
+    return {
+        "episode": episode_index + 1,
+        "steps": step_count,
+        "total_reward": total_reward,
+        "correct_decisions": correct,
+        "fraud_caught": fraud_caught,
+        "fraud_missed": fraud_missed,
+        "approve_count": action_counts["APPROVE"],
+        "block_count": action_counts["BLOCK"],
+        "review_count": action_counts["MANUAL_REVIEW"],
+    }
+
+
+# ------------------------------------------------------------
+# Save CSV summary
+# ------------------------------------------------------------
+def save_csv(rows: List[Dict[str, Any]], filepath: str):
+    os.makedirs(os.path.dirname(filepath), exist_ok=True)
+
+    fieldnames = [
+        "episode", "steps", "total_reward",
+        "correct_decisions", "fraud_caught", "fraud_missed",
+        "approve_count", "block_count", "review_count"
+    ]
+
+    write_header = not os.path.exists(filepath)
+
+    with open(filepath, "a", newline="") as f:
+        writer = csv.DictWriter(f, fieldnames=fieldnames)
+
+        if write_header:
+            writer.writeheader()
+
+        for row in rows:
+            writer.writerow(row)
+
+    print(f"\n[CSV] Saved random demo results to: {filepath}\n")
+
+
+# ------------------------------------------------------------
+# Main CLI
+# ------------------------------------------------------------
+def main():
+    parser = argparse.ArgumentParser(description="Random-policy baseline demo for the Federated Fraud Environment")
+    parser.add_argument("--episodes", type=int, default=1, help="How many random episodes to run")
+    parser.add_argument("--sleep", type=float, default=0.3, help="Delay between steps for visualization")
+    parser.add_argument("--no-render", action="store_true", help="Disable pygame rendering")
+    parser.add_argument("--seed", type=int, default=None, help="Optional seed for reproducibility")
+    parser.add_argument("--max-steps", type=int, default=50, help="Max steps per episode")
+
+    args = parser.parse_args()
+
+    render = not args.no_render
+
+    print("=" * 60)
+    print("Federated Learning – Random Policy Demonstration")
+    print("=" * 60)
+    print("\nThis script demonstrates the environment using RANDOM actions only.")
+    print("Used for visualization and baseline comparison.\n")
+
+    # Create environment
+    env = PrivFedFraudEnv(render_mode="human" if render else None, max_steps=args.max_steps)
+
+    # Seed if provided
+    if args.seed is not None:
+        env.reset(seed=args.seed)
+
+    all_episode_summaries = []
+
+    for ep in range(args.episodes):
+        summary = run_random_episode(env, ep, render, args.sleep)
+        all_episode_summaries.append(summary)
+
     env.close()
+
+    # Save results
+    save_csv(all_episode_summaries, "results/random_demo.csv")
+
+    # Print overall summary
+    avg_reward = sum(ep["total_reward"] for ep in all_episode_summaries) / len(all_episode_summaries)
+    print("=" * 60)
+    print("Overall Summary Across Episodes")
+    print("=" * 60)
+    print(f"Episodes run: {args.episodes}")
+    print(f"Average Reward: {avg_reward:.2f}")
+    print("CSV log saved in results/random_demo.csv")
+    print("=" * 60)
 
 
 if __name__ == "__main__":

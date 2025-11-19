@@ -7,6 +7,16 @@ import gymnasium as gym
 import numpy as np
 from gymnasium import spaces
 
+try:
+    # When imported from project root
+    from environment.rendering import PrivFedRenderer
+except ModuleNotFoundError:
+    try:
+        # When running scripts from within the environment package
+        from rendering import PrivFedRenderer
+    except ModuleNotFoundError:
+        PrivFedRenderer = None
+
 
 class PrivFedFraudEnv(gym.Env):
     """
@@ -270,8 +280,13 @@ class PrivFedFraudEnv(gym.Env):
         """Render the environment"""
         
         if self.render_mode == 'human':
+            if PrivFedRenderer is None:
+                raise ModuleNotFoundError(
+                    "PrivFedRenderer is unavailable. Ensure pygame and the "
+                    "rendering module dependencies are installed."
+                )
+            
             if self.renderer is None:
-                from environment.rendering import PrivFedRenderer
                 self.renderer = PrivFedRenderer(self)
             
             return self.renderer.render()
