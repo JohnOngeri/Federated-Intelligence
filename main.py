@@ -12,6 +12,7 @@ from stable_baselines3 import DQN, PPO, A2C
 import torch
 
 from environment.custom_env import PrivFedFraudEnv
+from environment.game_renderer import GameRenderer
 from training.reinforce_training import PolicyNetwork
 
 
@@ -132,8 +133,17 @@ def run_demonstration(model, algorithm_name, model_info, run_id, num_episodes=3)
     print("\nClose the pygame window to stop the demonstration")
     print("=" * 60)
     
-    # Create environment with rendering
-    env = PrivFedFraudEnv(render_mode='human', max_steps=100)
+    # Create environment with rendering (shorter for clear demo)
+    env = PrivFedFraudEnv(render_mode='human', max_steps=200)
+    
+    # Increase budgets for longer demo
+    env.initial_privacy_budget = 1000.0
+    env.initial_manual_budget = 100
+    
+    # Initialize game renderer
+    env.renderer = GameRenderer(env)
+    env.renderer.fraud_log = []
+    env.renderer.review_log = []
     
     action_names = {0: "APPROVE", 1: "BLOCK", 2: "MANUAL_REVIEW"}
     
@@ -155,7 +165,8 @@ def run_demonstration(model, algorithm_name, model_info, run_id, num_episodes=3)
             
             while not done:
                 # Render
-                env.render()
+                if env.renderer.render():
+                    break
                 
                 # Get action from model
                 if algorithm_name == 'REINFORCE':
@@ -171,9 +182,18 @@ def run_demonstration(model, algorithm_name, model_info, run_id, num_episodes=3)
                     else:
                         action = int(action)
                 
+                # Log fraud and review actions
+                if env.current_transaction['is_fraud'] and action in [1, 2]:  # BLOCK or REVIEW
+                    bank_id = env.current_transaction['bank_id']
+                    amount = env.current_transaction['amount']
+                    env.renderer.fraud_log.append(f"B{bank_id+1}: ${amount:.0f} FRAUD")
+                elif action == 2:  # MANUAL_REVIEW
+                    bank_id = env.current_transaction['bank_id']
+                    amount = env.current_transaction['amount']
+                    env.renderer.review_log.append(f"B{bank_id+1}: ${amount:.0f}")
+                
                 # Display action
-                if env.renderer:
-                    env.renderer.set_action(action)
+                env.renderer.set_action(action)
                 
                 # Execute action
                 next_obs, reward, terminated, truncated, info = env.step(action)
@@ -191,7 +211,7 @@ def run_demonstration(model, algorithm_name, model_info, run_id, num_episodes=3)
                 obs = next_obs
                 
                 # Slow down for visualization
-                time.sleep(0.3)
+                time.sleep(1.0)
             
             print("-" * 70)
             print(f"Episode {episode + 1} Complete:")

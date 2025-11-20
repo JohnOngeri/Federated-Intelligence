@@ -26,25 +26,36 @@ def load_all_results():
     
     results = {}
     
-    # Load DQN
-    if os.path.exists("results/training_logs/dqn_results.csv"):
-        results['DQN'] = pd.read_csv("results/training_logs/dqn_results.csv")
-        print(f"  ✓ DQN: {len(results['DQN'])} runs")
+    # Check multiple locations for results
+    result_paths = [
+        ("results/training_logs/", "../results/training_logs/", "../scripts/results/training_logs/"),
+    ]
     
-    # Load PPO
-    if os.path.exists("results/training_logs/ppo_results.csv"):
-        results['PPO'] = pd.read_csv("results/training_logs/ppo_results.csv")
-        print(f"  ✓ PPO: {len(results['PPO'])} runs")
-    
-    # Load A2C
-    if os.path.exists("results/training_logs/a2c_results.csv"):
-        results['A2C'] = pd.read_csv("results/training_logs/a2c_results.csv")
-        print(f"  ✓ A2C: {len(results['A2C'])} runs")
-    
-    # Load REINFORCE
-    if os.path.exists("results/training_logs/reinforce_results.csv"):
-        results['REINFORCE'] = pd.read_csv("results/training_logs/reinforce_results.csv")
-        print(f"  ✓ REINFORCE: {len(results['REINFORCE'])} runs")
+    for base_paths in result_paths:
+        for base_path in base_paths:
+            # Load DQN
+            dqn_path = os.path.join(base_path, "dqn_results.csv")
+            if os.path.exists(dqn_path) and 'DQN' not in results:
+                results['DQN'] = pd.read_csv(dqn_path)
+                print(f"  ✓ DQN: {len(results['DQN'])} runs")
+            
+            # Load PPO
+            ppo_path = os.path.join(base_path, "ppo_results.csv")
+            if os.path.exists(ppo_path) and 'PPO' not in results:
+                results['PPO'] = pd.read_csv(ppo_path)
+                print(f"  ✓ PPO: {len(results['PPO'])} runs")
+            
+            # Load A2C
+            a2c_path = os.path.join(base_path, "a2c_results.csv")
+            if os.path.exists(a2c_path) and 'A2C' not in results:
+                results['A2C'] = pd.read_csv(a2c_path)
+                print(f"  ✓ A2C: {len(results['A2C'])} runs")
+            
+            # Load REINFORCE
+            reinforce_path = os.path.join(base_path, "reinforce_results.csv")
+            if os.path.exists(reinforce_path) and 'REINFORCE' not in results:
+                results['REINFORCE'] = pd.read_csv(reinforce_path)
+                print(f"  ✓ REINFORCE: {len(results['REINFORCE'])} runs")
     
     return results
 

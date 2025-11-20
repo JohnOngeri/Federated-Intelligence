@@ -290,16 +290,33 @@ class PrivFedFraudEnv(gym.Env):
         
         return info
     
-    def render(self):
-        """Render the environment"""
+    def render(self, use_game_renderer: bool = False):
+        """
+        Render the environment
+        
+        Args:
+            use_game_renderer: If True, use the game-like renderer instead of default
+        """
         
         if self.render_mode == 'human':
+            if use_game_renderer:
+                # Try to use game renderer
+                try:
+                    from environment.game_renderer import GameRenderer
+                    if self.renderer is None or not isinstance(self.renderer, GameRenderer):
+                        self.renderer = GameRenderer(self)
+                    return self.renderer.render()
+                except ImportError:
+                    # Fall back to default if game renderer not available
+                    pass
+            
+            # Default renderer
             if PrivFedRenderer is None:
                 raise ModuleNotFoundError(
                     "PrivFedRenderer is unavailable. Ensure pygame and the "
                     "rendering module dependencies are installed."
                 )
-            
+
             if self.renderer is None:
                 self.renderer = PrivFedRenderer(self)
             
