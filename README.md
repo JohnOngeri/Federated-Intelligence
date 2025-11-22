@@ -9,6 +9,10 @@
 
 A sophisticated **federated fraud detection simulation** where reinforcement learning agents learn optimal transaction screening strategies across multiple banks while managing privacy budgets and manual review constraints. This project demonstrates advanced RL techniques applied to real-world financial security challenges.
 
+
+https://github.com/user-attachments/assets/2b0051a2-e55b-4d76-9fec-257b88ca541e
+
+
 ## 🌟 Key Features
 
 ### 🎮 **Arcade-Style Visualization**
@@ -59,39 +63,7 @@ A sophisticated **federated fraud detection simulation** where reinforcement lea
               │   1: BLOCK              │
               │   2: MANUAL_REVIEW      │
               └─────────────────────────┘
-```
-
-## 📁 Project Structure
-
-```
-Federated-Intelligence/
-├── 🎮 environment/
-│   ├── custom_env.py           # Core Gymnasium environment
-│   ├── game_renderer.py        # Advanced arcade-style visualization
-│   ├── rendering.py            # Classic dashboard renderer
-│   ├── random_demo.py          # Baseline random policy demo
-│   └── game_demo_trained.py    # Trained model game demo
-├── 🧠 training/
-│   ├── dqn_training.py         # Deep Q-Network with experience replay
-│   ├── pg_training.py          # PPO & A2C policy gradient methods
-│   └── reinforce_training.py   # Custom REINFORCE implementation
-├── 📊 evaluation/
-│   └── compare_algorithms.py   # Comprehensive algorithm analysis
-├── 💾 scripts/
-│   ├── models/                 # Trained model checkpoints
-│   │   ├── dqn/               # DQN models (10 runs)
-│   │   └── pg/                # PPO, A2C, REINFORCE models
-│   └── results/               # Training logs and analysis
-│       ├── training_logs/     # CSV performance data
-│       ├── figures/           # Publication-quality plots
-│       └── analysis/          # Summary statistics
-├── 🎯 main.py                 # Best model demonstration
-├── 📋 report.md               # Comprehensive technical report
-├── 🏗️ ARCHITECTURE.md         # System design documentation
-└── 📦 requirements.txt        # Python dependencies
-```
-
-## 🚀 Quick Start Guide
+```## 🚀 Quick Start Guide
 
 ### 1. Installation
 ```bash
@@ -185,12 +157,6 @@ Budget exhaustion: Early termination
 - **Performance metrics dashboard** with live updates
 - **Bank building visualization** with fraud rate indicators
 
-### **Analytics Dashboard**
-- **Comprehensive algorithm comparison** with statistical significance
-- **Hyperparameter sensitivity analysis** 
-- **Publication-quality plots** ready for academic papers
-- **LaTeX table generation** for reports
-
 ## 🔬 Technical Innovation
 
 ### **Advanced RL Techniques**
@@ -210,35 +176,6 @@ Budget exhaustion: Early termination
 - **Regulatory compliance** features (audit trails, manual review)
 - **Scalable architecture** supporting additional banks/features
 - **Production-ready inference** with sub-millisecond latency
-
-## 🎓 Academic Excellence & Grading Rubric Compliance
-
-### **Environment Validity & Complexity** (10/10 pts - Exemplary)
-- ✅ **Rich environment** with well-structured 3-action space (APPROVE/BLOCK/REVIEW)
-- ✅ **Complex reward structure** reflecting real-world fraud detection costs
-- ✅ **Multiple termination conditions** (budget exhaustion, max steps, early stopping)
-- ✅ **Agent explores all actions** including edge cases (high-risk legitimate transactions)
-- ✅ **Non-IID federated simulation** with heterogeneous bank data distributions
-
-### **Policy Training and Performance** (10/10 pts - Exemplary)
-- ✅ **Full-screen demonstration** with trained agent gameplay via `python main.py`
-- ✅ **Comprehensive metrics**: Average reward (68.5), steps per episode (200), convergence analysis
-- ✅ **Exploration-exploitation balance** through epsilon-decay (DQN) and entropy regularization (PPO/A2C)
-- ✅ **Weakness identification**: DQN instability, REINFORCE high variance
-- ✅ **Improvement suggestions**: Advanced replay buffers, multi-agent coordination
-
-### **Simulation Visualization** (10/10 pts - Exemplary)
-- ✅ **High-quality 2D visualization** using advanced PyGame with real-time orb trajectories
-- ✅ **Real-time feedback** showing agent decisions, fraud alerts, and audit trails
-- ✅ **Interactive elements**: Curved flight paths, gate targeting, bank fraud indicators
-- ✅ **Visually appealing**: Arcade-style graphics with smooth animations and professional UI
-- ✅ **Enhanced understanding**: Clear decision visualization with trajectory lines and arrows
-
-### **Stable Baselines/Policy Gradient Implementation** (10/10 pts - Exemplary)
-- ✅ **Multiple policy gradient methods**: PPO (best: 68.5), A2C (64.1), custom REINFORCE (52.4)
-- ✅ **Well-tuned hyperparameters**: Learning rates (1e-4 to 3e-3), batch sizes (64-256), network architectures
-- ✅ **Justified parameter choices**: PPO clip ratio (0.2) for stability, GAE lambda (0.95) for bias-variance tradeoff
-- ✅ **Comprehensive tuning**: 10+ runs per algorithm with statistical significance testing
 
 #### **Complete Hyperparameter Tuning: 40 Runs Across All Algorithms**
 
@@ -305,13 +242,6 @@ Budget exhaustion: Early termination
 - **Stability vs. performance**: Balanced exploration with convergence
 - **Statistical validation**: Multiple runs to ensure reproducibility
 
-### **Discussion & Analysis** (10/10 pts - Exemplary)
-- ✅ **Clear, well-labeled graphs**: Box plots, violin plots, hyperparameter sensitivity analysis
-- ✅ **Multiple relevant figures**: Performance comparison, fraud detection rates, stability metrics
-- ✅ **Precise descriptions**: Statistical significance, confidence intervals, performance trends
-- ✅ **Qualitative + quantitative insights**: Algorithm strengths/weaknesses with numerical evidence
-- ✅ **Creative visualization**: Arcade-style demo, trajectory visualization, real-time audit trails
-
 ## 🚀 Future Extensions
 
 - **Multi-agent federated learning** with bank-specific policies
@@ -320,19 +250,3 @@ Budget exhaustion: Early termination
 - **Integration with actual banking APIs** for production deployment
 - **Explainable AI features** for regulatory compliance
 
-## 📚 References & Inspiration
-
-- Federated Learning: Challenges, Methods, and Future Directions
-- Deep Reinforcement Learning for Financial Trading
-- Privacy-Preserving Machine Learning in Finance
-- Multi-Agent Systems for Fraud Detection
-
-## 📄 License
-
-MIT License - Educational & Research Project
-
----
-
-**Built with ❤️ for advancing AI in financial security**
-
-*This project demonstrates the intersection of reinforcement learning, federated learning, and practical financial applications, showcasing both technical depth and real-world relevance.*
