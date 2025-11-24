@@ -320,6 +320,15 @@ def main():
     plot_algorithm_comparison(results, summary_df)
     plot_hyperparameter_sensitivity(results)
     
+    # Generate training curves and stability analysis
+    try:
+        print("\nGenerating training curves and stability analysis...")
+        from evaluation.plot_training_curves import plot_comprehensive_training_analysis
+        plot_comprehensive_training_analysis()
+    except Exception as e:
+        print(f"  Warning: Could not generate training curves: {e}")
+        print("  Run separately: python evaluation/plot_training_curves.py")
+    
     # Generate LaTeX table
     generate_latex_table(summary_df)
     
@@ -340,6 +349,7 @@ def main():
     print("  • results/analysis/algorithm_table.tex")
     print("  • results/figures/comprehensive_comparison.png")
     print("  • results/figures/hyperparameter_sensitivity.png")
+    print("  • results/figures/training_stability_comprehensive.png")
     print("\n" + "=" * 70)
 
 
